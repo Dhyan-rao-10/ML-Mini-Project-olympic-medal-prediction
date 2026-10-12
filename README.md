@@ -1,24 +1,12 @@
 # Olympic Medal Prediction
 
-A solo machine-learning mini-project to estimate Summer Olympic medal counts by country using historical Olympic results and country-level development indicators. The repository contains a reproducible data-preparation pipeline, time-aware model evaluation, a benchmark of the assigned paper's model families, and a retrospective 2020 forecast.
+This machine-learning project estimates Summer Olympic medal counts by country using historical Olympic results and country-level development indicators. The repository contains a reproducible data-preparation pipeline, time-aware model evaluation, a benchmark of the assigned paper's model families, and a retrospective 2020 forecast.
+
+**Team:** Dhyan Rao (PES1UG24AM090) and J Karthik (PES1UG24AM804)
 
 ## Project question
 
 Can past Olympic performance and socioeconomic indicators help estimate how many medals each country will win? The project compares a last-observed-Games baseline, a two-stage medal-winner classifier plus Poisson count model, and a momentum-adjusted Ridge model. The main test is chronological: 2012 is used for model selection and 2016 is held out as the final historical test.
-
-## Folder guide
-
-```text
-data/
-  raw/          # Downloaded source files (kept out of Git)
-  processed/    # Cleaned/merged datasets (kept out of Git)
-notebooks/
-  01_data_preparation.ipynb
-  02_modeling.ipynb
-src/            # Reusable Python code as the project grows
-tests/          # Offline regression tests for data preparation and model runs
-outputs/figures/ # Charts for the report and presentation
-```
 
 ## Setup
 
@@ -38,7 +26,7 @@ Install the project packages in the environment:
 python -m pip install -r requirements.txt
 ```
 
-Open `notebooks/01_data_preparation.ipynb` in VS Code and select the `.venv` Python kernel. It prepares the country-Games targets and merges pre-Games World Bank features. Open `notebooks/02_modeling.ipynb` to run the time-based backtest. From the project root, you can also run either stage in the terminal:
+From the project root, prepare the country-Games data and run the main evaluation:
 
 ```bash
 # Windows PowerShell
@@ -62,7 +50,7 @@ This writes the prepared country-Games table, reshaped World Bank indicators, an
 python -m src.paper_benchmark
 ```
 
-The benchmark compares Logistic Regression, SVM, Gaussian Naive Bayes, MLP, and Random Forest classifiers, plus Linear, Ridge, Lasso, Poisson, SVR, and Random Forest regressors. It tunes on Games through 2008, selects using 2012, refits the selected pair through 2012, and evaluates once on the 2016 holdout. It saves `paper_model_benchmarks.csv` and `paper_model_2016_predictions.csv` under `data/processed/`. The visualization command saves two charts in `outputs/figures/`. Generated data and charts remain excluded from Git.
+The benchmark compares Logistic Regression, SVM, Gaussian Naive Bayes, MLP, and Random Forest classifiers, plus Linear, Ridge, Lasso, Poisson, SVR, and Random Forest regressors. It tunes on Games through 2008, selects using 2012, refits the selected pair through 2012, and evaluates once on the 2016 holdout. Results are saved in `data/processed/paper_model_benchmarks.csv` and `data/processed/paper_model_2016_predictions.csv`. The visualization command saves charts in `outputs/figures/`. Generated data and charts are excluded from Git.
 
 Run the offline tests from the project root with:
 
@@ -103,21 +91,9 @@ Put the downloaded files under `data/raw/`. Do not commit raw datasets to Git; t
 
 The preparation notebook checks the source files, builds country-Games medal counts, applies the NOC-to-World Bank crosswalk, and joins indicators from the year before each Games. The crosswalk and final modeling table are saved under `data/processed/` so the cleaning can be reviewed and repeated.
 
-## Suggested modelling workflow
+## Results
 
-1. Aggregate Olympic outcomes to one row per country per Summer Games.
-2. Match country codes consistently before merging World Bank indicators, using the year before each Games for features.
-3. Add the previous observed Games medal count and a host-country feature if reliable host data is available.
-4. Explore zero-medal records and missing values; document cleaning choices.
-5. Compare the last-observed-Games baseline with the two-stage Logistic/Poisson model and momentum-adjusted Ridge model; also run the assigned-paper benchmark across its classifier and regressor families.
-6. Use 2012 as the validation/model-selection Games and 2016 as the final historical holdout. Features for every Games use only earlier observed Olympic results and the prior year's World Bank indicators; do not randomly split country-Games rows.
-7. Evaluate with MAE/RMSE and a separately reported classification score for medal-winning NOCs. Inspect leading-country predictions and discuss the small historical sample, the limits of the Tokyo medal-only file, and other assumptions.
-
-Because the 2020 Games have already taken place, treat the project as a retrospective forecast: build the 2020 prediction using only information that would have been available before those Games, then compare with actual 2020 outcomes at the end.
-
-## Current evaluation (reproduce before quoting)
-
-The latest local run of `python -m src.data_preparation` and `python -m src.modeling` produced these results:
+The evaluation is chronological: 2012 is used for validation/model selection and 2016 is held out for final historical testing. The 2020 exercise is retrospective and uses only information available before those Games.
 
 | Evaluation | Model | MAE | RMSE | Notes |
 | --- | --- | ---: | ---: | --- |
@@ -129,16 +105,6 @@ The latest local run of `python -m src.data_preparation` and `python -m src.mode
 | Tokyo 2020 retrospective | Momentum-adjusted Ridge | 1.556 | 3.558 | Uses 2016 medal totals and delegation size |
 | Tokyo 2020 retrospective | Previous-Games baseline | 1.683 | 3.673 | Same comparison table |
 
-The assigned-paper benchmark records every candidate's 2012 validation scores and selected parameters. On the current data, SVM had the highest 2012 validation accuracy (0.892), and Random Forest had the lowest validation residual standard deviation among medal winners (3.815); their selected two-stage model's 2016 medal-count MAE/RMSE were 1.418/3.563. This is a leakage-aware comparison of the paper's model families, not an exact reproduction: the available World Bank export contains GDP, population, and land area, and this benchmark uses previous-Games delegation size rather than same-Games athlete counts, which would not be available for a pre-Games forecast. Thus its GaussianNB + tuned Ridge selection and residual statistic are not directly comparable. On the 2016 holdout, both our Ridge model and the paper-family benchmark lose to the previous-Games baseline (MAE 1.265; RMSE 3.230). Ridge improves count errors in the retrospective Tokyo comparison, but that comparison has the participation-data limitation below; its Logistic medal-winner classifier (threshold 0.56) has recall 0.753 and precision 0.933. Do not claim that this project beats every prior model. Full metrics and country-level predictions are saved under `data/processed/` after running the pipeline.
+In the paper-family benchmark, SVM had the highest 2012 validation accuracy (0.892), while Random Forest had the lowest validation residual standard deviation among medal winners (3.815). The selected SVM + Random Forest pair scored 1.418 MAE and 3.563 RMSE on the 2016 holdout. This benchmark is not an exact reproduction: the available World Bank export provides GDP, population, and land area, and this project uses previous-Games delegation size rather than same-Games athlete counts, which would not be available before a Games. The paper's model selection and error statistics are therefore not directly comparable. On the 2016 holdout, both Ridge and the paper-family benchmark score worse than the previous-Games baseline. Ridge improves count errors in the retrospective Tokyo comparison, but that comparison has the participation-data limitation below. Full metrics and country-level predictions are saved under `data/processed/` after running the pipeline.
 
-The Tokyo file contains medal-winning NOCs only. The evaluation treats forecast candidates with no row in that file as zero recorded medals, but cannot distinguish a non-participant from a participant that won no medal. This limits interpretation of all Tokyo-wide error and classification scores. The file also does not provide an official non-medalist participation table. Chinese Taipei's NOC is retained through a manual `TPE` → World Bank `TWN` code mapping, but this particular World Bank export has no Taiwan indicator rows, so those values are imputed by the models.
-
-## Deliverables checklist
-
-- Private GitHub repository with this README, reproducible code, and offline tests
-- Two-page PDF write-up (the assignment heading says “One-Page,” while the detailed requirement says two pages; follow the detailed two-page instruction unless the faculty clarifies)
-- Presentation slides and a live demonstration
-
-## Team note
-
-This repository is being completed by one student. Keep the first version small and make sure every result can be rerun from the README instructions.
+The Tokyo source lists medal-winning NOCs only. An absent row may indicate non-participation or participation without a medal, so Tokyo-wide error and classification scores should be interpreted cautiously. Chinese Taipei is mapped from NOC `TPE` to World Bank code `TWN`, but this World Bank export has no Taiwan indicator values; those features are imputed during model fitting.
