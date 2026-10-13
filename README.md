@@ -2,7 +2,7 @@
 
 This machine-learning project estimates Summer Olympic medal counts by country using historical Olympic results and country-level development indicators. The repository contains a reproducible data-preparation pipeline, time-aware model evaluation, a benchmark of the assigned paper's model families, and a retrospective 2020 forecast.
 
-**Team:** Dhyan Rao (PES1UG24AM090) and J Karthik (PES1UG24AM804)
+**Team:** Dhyan Rao (PES1UG24AM090) and J Karthik (PES1UG25AM804)
 
 ## Project question
 

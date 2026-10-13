@@ -13,6 +13,10 @@ data/processed/*
 outputs/*
 !outputs/figures/.gitkeep
 
+# Presentation and write-up build files (submitted separately)
+output/
+.codex-ppt-build/
+
 # Editor / OS files
 .vscode/
 .DS_Store
